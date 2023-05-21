@@ -7,7 +7,8 @@ const screencontainer = document.querySelector("screen-container"),
     pcont = document.querySelector("project-container"),
     pname = document.querySelector("header input"),
     err = document.querySelector("#error"),
-    background = document.querySelector("#background")
+    background = document.querySelector("#background"),
+    nav = document.querySelector("nav")
 
 let active = false,
     screen = window.localStorage.getItem("screen"),
@@ -325,6 +326,7 @@ function stopElement(ev) {
         }
         elem = null
         calc()
+        updateList()
         save()
     }
 }
@@ -379,11 +381,30 @@ function save() {
 function showChosen() {
     chosen = document.querySelector(".chosen")
     if (chosen) {
-        document.querySelector("nav").innerHTML = `Name: ${chosen.getAttribute("name")} <br> Width: ${chosen.getAttribute("width")} <br> Height: ${chosen.getAttribute("height")} <br> Is basis: ${chosen.getAttribute("is_basis")} <br> Rotation: ${parseInt(chosen.style.transform.replace('rotate(', '')) || 0} degrees`
+        nav.children[0].innerHTML = `Name: ${chosen.getAttribute("name")} <br> Width: ${chosen.getAttribute("width")} <br> Height: ${chosen.getAttribute("height")} <br> Is basis: ${chosen.getAttribute("is_basis")} <br> Rotation: ${parseInt(chosen.style.transform.replace('rotate(', '')) || 0} degrees`
     } else {
-        document.querySelector("nav").innerHTML = ""
+        nav.children[0].innerHTML = ""
+    }
+    updateList()
+}
+function updateList() {
+    nav.children[1].innerHTML = ""
+    for (let i = 0; i < pcont.children.length; i++) {
+        let p = document.createElement("p")
+        p.setAttribute("pid", i.toString())
+        p.innerText = pcont.children[i].getAttribute("name")
+        p.addEventListener("click", (ev) => {
+            for (const element of pcont.children) {
+                element.classList.remove("chosen")
+            }
+            pcont.children[parseInt(ev.target.getAttribute("pid"))].classList.add("chosen")
+            showChosen()
+            save()
+        })
+        nav.children[1].append(p)
     }
 }
+
 
 switch (screen) {
     case "0":

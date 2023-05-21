@@ -48,7 +48,12 @@
                 </project-container>
             </main>
             <nav>
-    
+                <chosen-info>
+
+                </chosen-info>
+                <item-list>
+                    
+                </item-list>
             </nav>
             <footer>
     
