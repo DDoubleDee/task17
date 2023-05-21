@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{URL::to('/')}}/style.css">
     <title>Task 17</title>
 </head>
-<body onkeydown="stopChosen(event)" onmouseup="stopContainer(event); stopElement(event)">
+<body onkeyup="disallow(event)" onkeydown="stopChosen(event)" onmouseup="stopContainer(event); stopElement(event)">
     <screen-container>
         <screen-login>
             <form onsubmit="event.preventDefault(); signIn()">
@@ -52,7 +52,7 @@
 
                 </chosen-info>
                 <item-list>
-                    
+
                 </item-list>
             </nav>
             <footer>

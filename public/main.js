@@ -24,7 +24,8 @@ let active = false,
     elem,
     chosen,
     zoomed = false,
-    transformwas
+    transformwas,
+    moveallowed = false
 
 if (token) {
     createInstance()
@@ -168,38 +169,40 @@ function createInstance() {
 function moveContainer(ev) {
     ev.preventDefault();
     if (active) { return }
-    if (ev.target == pcont || ev.target == pcont.parentElement) {
+    if (ev.target == pcont || ev.target == pcont.parentElement || moveallowed) {
+        if(!moveallowed) {return}
         xstart = parseInt(pcont.style.left) || 0
         ystart = parseInt(pcont.style.top) || 0
         xmstart = ev.clientX
         ymstart = ev.clientY
         window.addEventListener("mousemove", trackContainer)
-    }
-    try {
-        if (zoomed) return
-        let t = ev.target
-        while (!t.hasAttribute("is_basis")) { t = t.parentElement }
-        elem = t
-        for (const element of pcont.children) {
-            element.classList.remove("chosen")
+    } else {
+        try {
+            if (zoomed) return
+            let t = ev.target
+            while (!t.hasAttribute("is_basis")) { t = t.parentElement }
+            elem = t
+            for (const element of pcont.children) {
+                element.classList.remove("chosen")
+            }
+            chosen = elem
+            chosen.classList.add("chosen")
+            showChosen()
+            elem.style.cursor = "grabbing"
+            elem.style.zIndex = "9"
+            xstart = elem.getBoundingClientRect().left
+            ystart = elem.getBoundingClientRect().top
+            xhistory = elem.style.left
+            yhistory = elem.style.top
+            xmstart = ev.clientX
+            ymstart = ev.clientY
+            elem.style.left = `${xstart + ev.clientX - xmstart}px`
+            elem.style.top = `${ystart + ev.clientY - ymstart}px`
+            elem.style.position = "fixed"
+            window.addEventListener("mousemove", trackElement)
+        } catch (error) {
+    
         }
-        chosen = elem
-        chosen.classList.add("chosen")
-        showChosen()
-        elem.style.cursor = "grabbing"
-        elem.style.zIndex = "9"
-        xstart = elem.getBoundingClientRect().left
-        ystart = elem.getBoundingClientRect().top
-        xhistory = elem.style.left
-        yhistory = elem.style.top
-        xmstart = ev.clientX
-        ymstart = ev.clientY
-        elem.style.left = `${xstart + ev.clientX - xmstart}px`
-        elem.style.top = `${ystart + ev.clientY - ymstart}px`
-        elem.style.position = "fixed"
-        window.addEventListener("mousemove", trackElement)
-    } catch (error) {
-
     }
 }
 function stopContainer(ev) {
@@ -285,26 +288,7 @@ function stopElement(ev) {
         } else {
             elem.style.zIndex = "10"
         }
-        if (elem.getAttribute("is_basis") == "true") {
-            for (const element of pcont.children) {
-                if (element.getAttribute("is_basis") == "true") {
-                    let bound = element.getBoundingClientRect(),
-                        belem = elem.getBoundingClientRect(),
-                        ib = belem.top + belem.height > bound.top && belem.top + belem.height < bound.top + bound.height,
-                        it = belem.top > bound.top && belem.top < bound.top + bound.height,
-                        il = belem.left > bound.left && belem.left < bound.left + bound.width,
-                        ir = belem.left + belem.width > bound.left && belem.left + belem.width < bound.left + bound.width
-                    if ((it || ib) && (il || ir)) {
-                        if (belong) {
-                            elem.style.left = xhistory
-                            elem.style.top = yhistory
-                        } else {
-                            elem.remove()
-                        }
-                    }
-                }
-            }
-        } else {
+        if (elem.getAttribute("is_basis") != "true") {
             for (const element of pcont.children) {
                 if (element.getAttribute("is_basis") == "false") {
                     let bound = element.getBoundingClientRect(),
@@ -371,6 +355,13 @@ function stopChosen(ev) {
         save()
         calc()
         showChosen()
+    } else if(ev.code == "Space") {
+        moveallowed = true
+    }
+}
+function disallow(ev) {
+    if(ev.code == "Space") {
+        moveallowed = false
     }
 }
 function save() {
